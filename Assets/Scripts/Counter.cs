@@ -3,7 +3,8 @@ using System.Collections;
 
 public class Counter : MonoBehaviour
 {
-    [SerializeField] private CounterDisplay _counterDisplay; 
+    public delegate void CountUpdated(int count);
+    public event CountUpdated OnCountUpdated;
 
     private int _count;
     private Coroutine _countingCoroutine;
@@ -22,7 +23,7 @@ public class Counter : MonoBehaviour
     private void InitializeCounter()
     {
         _count = 0;
-        _counterDisplay.UpdateCounterText(_count); 
+        OnCountUpdated?.Invoke(_count); 
     }
 
     private void HandleInput()
@@ -55,25 +56,20 @@ public class Counter : MonoBehaviour
         StopCoroutine(_countingCoroutine);
         _countingCoroutine = null;
     }
-
+     
     private IEnumerator Count()
     {
-        while (CanContinueCounting())
+        while (enabled) 
         {
             yield return new WaitForSeconds(_countInterval);
             IncrementCount();
         }
     }
 
-    private bool CanContinueCounting()
-    {
-        return true;
-    }
-
     private void IncrementCount()
     {
         _count++;
-        _counterDisplay.UpdateCounterText(_count); 
+        OnCountUpdated?.Invoke(_count); 
         Debug.Log("Count: " + _count);
     }
 }
